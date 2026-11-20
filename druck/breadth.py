@@ -24,14 +24,34 @@ UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chr
 INDEXES = [
     # key, 이름, 지수 티커, 구성 종목 위키 주소
     ("sp", "S&P 500", "^GSPC", "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"),
-    ("ndx", "나스닥 100", "^NDX", "https://en.wikipedia.org/wiki/Nasdaq-100"),
+    ("ndx", "나스닥 100", "^NDX", ["https://api.nasdaq.com/api/quote/list-type/nasdaq100",
+                                   "https://en.wikipedia.org/wiki/List_of_Nasdaq-100_companies",
+                                   "https://en.wikipedia.org/wiki/Nasdaq-100"]),
 ]
 
 
-def constituents(url: str) -> list[str]:
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
+def constituents(urls) -> list[str]:
+    """구성 종목 티커. 주소를 여러 개 주면 되는 것을 쓴다 (나스닥 API JSON 또는 위키피디아 표)."""
+    errs = []
+    for url in ([urls] if isinstance(urls, str) else urls):
+        try:
+            return _constituents(url)
+        except Exception as e:  # noqa: BLE001
+            errs.append(f"{url.split('/')[2]}: {str(e)[:150]}")
+    raise ValueError(" / ".join(errs))
+
+
+def _constituents(url: str) -> list[str]:
+    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json, text/html"})
     with urllib.request.urlopen(req, timeout=20) as r:
         text = r.read().decode("utf-8", "replace")
+    if "api.nasdaq.com" in url:
+        import json
+        rows = json.loads(text)["data"]["data"]["rows"]
+        vals = sorted({str(x["symbol"]).strip().replace(".", "-") for x in rows if x.get("symbol")})
+        if len(vals) < 80:
+            raise ValueError(f"{len(vals)}종목뿐")
+        return vals
     seen = []
     for t in pd.read_html(io.StringIO(text)):
         cols = [" ".join(map(str, c)) if isinstance(c, tuple) else str(c) for c in t.columns]
