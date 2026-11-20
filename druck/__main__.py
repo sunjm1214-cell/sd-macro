@@ -131,10 +131,20 @@ def cmd_run(args):
             print(f"[경고] 매크로 차트 데이터 없음 {len(miss)}개: " + ", ".join(miss), file=sys.stderr)
     except Exception as e:
         print(f"[경고] 매크로 차트 생략: {e}", file=sys.stderr)
+    breadth = None
+    if not args.offline:
+        try:  # 매크로 차트: 시장 폭 (ADL) — S&P 500 · 나스닥 100 구성 종목으로 계산
+            from .breadth import build as build_breadth
+            breadth = build_breadth(ctx, demo=args.demo)
+            for v in breadth.values():
+                print(f"시장 폭 {v['name']}: " + (f"[경고] {v['err']}" if "err" in v else f"{v['n']}종목 · {v['state']}"),
+                      file=sys.stderr)
+        except Exception as e:
+            print(f"[경고] 시장 폭 생략: {e}", file=sys.stderr)
     from .reference import load as load_reference
     reference = load_reference()  # 참고자료: sources/ 의 인터뷰 정리
     out.write_text(render(results, ctx.recessions(), demo=args.demo, as_of=args.as_of, chart_html=chart_html,
-                          ngdp=ngdp, updates=updates, earnings=earnings, reference=reference, markets=markets), encoding="utf-8")
+                          ngdp=ngdp, updates=updates, earnings=earnings, reference=reference, markets=markets, breadth=breadth), encoding="utf-8")
     print(f"리포트: {out.resolve()}")
     if args.open:
         webbrowser.open(out.resolve().as_uri())

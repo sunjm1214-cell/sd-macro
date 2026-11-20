@@ -17,6 +17,7 @@ from .core import Chart, Signal, ToolResult
 from .earnings import CSS as E_CSS, JS as E_JS, view as e_view
 from .reference import CSS as R_CSS, view as r_view
 from .markets import CSS as M_CSS, strip as m_strip, views as m_views
+from .breadth import CSS as B_CSS, view as b_view
 from .links import data_links
 from .registry import LAYERS, USES, get_tool
 from .stats import _ALIAS
@@ -430,7 +431,8 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>docume
 def render(results: list[ToolResult], recessions, demo: bool = False, as_of: str | None = None,
            title: str = "SD 매크로 대시보드", chart_html: str | None = None, ngdp: dict | None = None,
            updates: list[dict] | None = None, earnings: list[dict] | None = None,
-           reference: dict | None = None, markets: dict | None = None) -> str:
+           reference: dict | None = None, markets: dict | None = None,
+           breadth: dict | None = None) -> str:
     """메뉴: 홈 / 매크로 분석(요약 + 1~5층) / 실적·컨콜 / 매크로 차트(지수·채권·원자재·통화·한눈 차트·명목GDP) / 참고자료.
     화면은 #해시로 하나씩 연다. 탭은 data-v 접두어로 하위 화면까지 켜진다(macro-3 → macro)."""
     from .links import LINKS
@@ -480,10 +482,11 @@ def render(results: list[ToolResult], recessions, demo: bool = False, as_of: str
         return cid
 
     etc_pages = [(f"chart-{g['key']}", g["name"]) for g in (markets or {}).get("groups", [])]
+    etc_pages += [("chart-breadth", "시장 폭 (ADL)")] if breadth else []
     etc_pages += ([("chart-overview", "한눈 차트")] if chart_html else []) + ([("chart-ngdp", "명목GDP vs 금리")] if ngdp else [])
     enav = lambda cur: ("<div class='lnav'><b>매크로 차트</b>" + "".join(
         f"<a href='#{k}' class='{'on' if k == cur else ''}'>{html.escape(n)}</a>" for k, n in etc_pages) + "</div>")
-    market_html = m_views(markets, sub, enav, add_chart)
+    market_html = m_views(markets, sub, enav, add_chart) + b_view(breadth, sub, enav, add_chart)
     tabs = ["<a href='#home' data-v='home'>홈</a>",
             "<a href='#macro' data-v='macro'>매크로 분석</a>"]
     if earnings is not None:
@@ -498,7 +501,7 @@ def render(results: list[ToolResult], recessions, demo: bool = False, as_of: str
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>{html.escape(title)}</title>
 <script src="{PLOTLY}"></script>
-<style>{CSS}{E_CSS}{R_CSS}{M_CSS}</style></head><body>
+<style>{CSS}{E_CSS}{R_CSS}{M_CSS}{B_CSS}</style></head><body>
 <header class='top'><div class='in'><a class='brand' href='#home'>내 주식 사이트</a>{''.join(tabs)}</div></header>
 <main>
 <div class='view' id='v-home' data-title='홈'>

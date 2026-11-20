@@ -310,3 +310,17 @@ def test_repo_earnings_have_region():
     from druck.earnings import load
     for d in load():
         assert d.get("region") in ("미국", "그 외"), d["_file"]
+
+
+def test_breadth_adl_and_view():
+    import numpy as np
+    import pandas as pd
+    from druck.breadth import _demo, compute, view
+    idx = pd.bdate_range("2025-01-01", periods=300)
+    closes = pd.DataFrame({"A": np.arange(300) + 100.0, "B": 400 - np.arange(300.0), "C": np.r_[np.arange(150), np.arange(150)[::-1]] + 50.0}, index=idx)
+    r = compute(closes, pd.Series(np.arange(300) + 1000.0, index=idx))
+    assert r["adv"] == 1 and r["dec"] == 2 and int(r["net"].iloc[1]) == 1  # A·C 상승, B 하락 → +1
+    b = {"sp": {"name": "S&P 500", **_demo("sp")}, "ndx": {"name": "나스닥 100", "err": "x"}}
+    charts = []
+    h = view(b, "sub", lambda k: "", lambda spec: charts.append(spec) or f"c{len(charts)}")
+    assert "v-chart-breadth" in h and "데이터 없음" in h and len(charts) == 2 and charts[0]["layout"]["yaxis2"]["overlaying"] == "y"
