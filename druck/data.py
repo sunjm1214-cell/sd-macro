@@ -151,11 +151,12 @@ class FredSource(_Checked):
     kind = "fred"
 
     def __init__(self, cache_dir=None, max_age_hours: float = 12, refresh: bool = False,
-                 api_key: str | None = None, timeout: float = 30, check_updates: bool = False):
+                 api_key: str | None = None, timeout: float = 20, check_updates: bool = False):
         self.cache = _Cache(cache_dir, max_age_hours, refresh)
-        self.api_key = api_key or os.environ.get("FRED_API_KEY")
+        self.api_key = api_key or os.environ.get("FRED_API_KEY") or None
         self.timeout = timeout
         self._mem: dict[str, pd.Series] = {}
+        self._failed: dict[str, str] = {}
         self.overrides: dict[str, pd.Series] = {}
         self._init_check(check_updates or refresh)
 
@@ -164,12 +165,20 @@ class FredSource(_Checked):
             return self.overrides[sid].copy()
         if sid in self._mem:
             return self._mem[sid].copy()
-        s = self._load(sid, self._download).astype(float).rename(sid)
+        if sid in self._failed:  # 이번 실행에서 이미 실패 — 다시 기다리지 않는다
+            raise DataUnavailable(self._failed[sid])
+        try:
+            s = self._load(sid, self._download).astype(float).rename(sid)
+        except DataUnavailable as e:
+            self._failed[sid] = str(e)
+            raise
         self._mem[sid] = s
         return s.copy()
 
     def _fetch(self, url: str) -> str:
-        req = urllib.request.Request(url, headers={"User-Agent": "druck-macro/0.1"})
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 sd-macro",
+            "Accept": "text/csv,application/json,*/*"})
         with urllib.request.urlopen(req, timeout=self.timeout) as r:
             return r.read().decode("utf-8")
 
@@ -198,12 +207,19 @@ class YahooSource(_Checked):
         self.cache = _Cache(cache_dir, max_age_hours, refresh)
         self.start = start
         self._mem: dict[str, pd.Series] = {}
+        self._failed: dict[str, str] = {}
         self._init_check(check_updates or refresh)
 
     def get(self, ticker: str) -> pd.Series:
         if ticker in self._mem:
             return self._mem[ticker].copy()
-        s = self._load(ticker, self._download).astype(float).rename(ticker)
+        if ticker in self._failed:
+            raise DataUnavailable(self._failed[ticker])
+        try:
+            s = self._load(ticker, self._download).astype(float).rename(ticker)
+        except DataUnavailable as e:
+            self._failed[ticker] = str(e)
+            raise
         self._mem[ticker] = s
         return s.copy()
 
@@ -212,7 +228,14 @@ class YahooSource(_Checked):
             import yfinance as yf
         except ImportError as e:
             raise DataUnavailable("yfinance 미설치 → pip install yfinance") from e
-        df = yf.download(ticker, start=self.start, auto_adjust=True, progress=False, threads=False)
+        df = None
+        for attempt in range(3):  # 병렬 다운로드 때 yfinance 내부 캐시가 잠기는 경우('database is locked') 다시 시도
+            df = yf.download(ticker, start=self.start, auto_adjust=True, progress=False, threads=False, timeout=20)
+            if df is not None and not df.empty:
+                break
+            time.sleep(1 + attempt)
+        if df is None or df.empty:
+            raise ValueError("빈 데이터")
         close = df["Close"]
         if isinstance(close, pd.DataFrame):
             close = close.iloc[:, 0]
