@@ -97,7 +97,9 @@ def compute(closes: pd.DataFrame, index: pd.Series) -> dict:
     i_off = float((index.iloc[-1] / i1.max() - 1) * 100)
     lag = int((i_hi - a_hi).days)
     if lag >= 30 and i_off >= -3:
-        state, cls = f"다이버전스 — ADL 고점 {a_hi:%Y-%m-%d}가 지수 고점 {i_hi:%Y-%m-%d}보다 {lag}일 먼저", "dn"
+        state, cls = f"다이버전스 진행 중 — ADL 고점 {a_hi:%m/%d}가 지수 고점 {i_hi:%m/%d}보다 {lag}일 먼저", "dn"
+    elif lag >= 30:
+        state, cls = f"ADL이 먼저 꺾인 뒤({a_hi:%m/%d}) 지수도 하락({i_hi:%m/%d} 고점 대비 {i_off:.0f}%) — 다이버전스 경고가 맞은 구간", "dn"
     elif a_hi >= adl.index[-1] - pd.Timedelta(days=10):
         state, cls = "ADL도 신고가 — 폭이 지수를 확인", "up"
     else:
