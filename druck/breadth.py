@@ -32,11 +32,17 @@ def constituents(url: str) -> list[str]:
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=20) as r:
         text = r.read().decode("utf-8", "replace")
+    seen = []
     for t in pd.read_html(io.StringIO(text)):
-        for col in ("Symbol", "Ticker"):
-            if col in t.columns and 80 <= len(t) <= 600:
-                return sorted({str(x).strip().replace(".", "-") for x in t[col] if str(x).strip()})
-    raise ValueError("구성 종목 표를 찾지 못함")
+        cols = [" ".join(map(str, c)) if isinstance(c, tuple) else str(c) for c in t.columns]
+        seen.append(f"{len(t)}행 {cols[:4]}")
+        for i, c in enumerate(cols):
+            if any(k in c.lower() for k in ("symbol", "ticker")) and 80 <= len(t) <= 600:
+                vals = [str(x).strip().replace(".", "-") for x in t.iloc[:, i]]
+                vals = [v for v in vals if v and v.lower() != "nan" and len(v) <= 6 and v.replace("-", "").isalnum()]
+                if len(vals) >= 80:
+                    return sorted(set(vals))
+    raise ValueError("구성 종목 표를 찾지 못함: " + " | ".join(seen[:8]))
 
 
 def _closes(tickers: list[str], period: str = "2y") -> pd.DataFrame:
