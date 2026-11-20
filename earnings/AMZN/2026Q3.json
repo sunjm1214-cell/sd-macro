@@ -1,0 +1,70 @@
+{
+  "ticker": "AMZN",
+  "company": "아마존",
+  "region": "미국",
+  "sector": "소비재 · 이커머스·클라우드",
+  "ai_role": "둘 다",
+  "period": "2026년 3분기",
+  "period_end": "2026-09-30",
+  "call_date": "2026-10-29",
+  "updated": "2026-11-20",
+  "verdict": "mixed",
+  "headline": "AWS가 +39%로 약 5년 만에 가장 빨리 성장했고 영업이익률 13.9%는 사상 최고. 그러나 분기 설비투자 773억 달러가 예상(약 587억 달러)을 크게 넘었고, EPS·매출 소폭 미달에 연말 매출 가이던스도 신중했다. 시간외 주가 약 −7%.",
+  "numbers": [
+    {"label": "매출", "value": "$201.9B", "vs": "전년비 +12% (프라임데이 이동 제외 시 약 +16%) · 컨센 약 $202.3B 소폭 하회", "good": false},
+    {"label": "EPS", "value": "$1.89", "vs": "컨센 약 $1.96 · 전년 앤트로픽 지분 평가이익(95억 달러) 기저", "good": false},
+    {"label": "영업이익", "value": "$28.1B", "vs": "전년비 +61% · 회사 가이던스($22.5~26.5B) 상회 · 영업이익률 13.9% 사상 최고", "good": true},
+    {"label": "AWS 매출", "value": "$46.0B", "vs": "전년비 +39.3%, 약 5년 만에 최고 성장 · 연환산 1,840억 달러", "good": true},
+    {"label": "AWS 영업이익", "value": "$17.8B", "vs": "영업이익률 약 38.7% (전년 $11.4B)", "good": true},
+    {"label": "설비투자", "value": "$77.3B", "vs": "예상 약 $58.7B, 전년 $35.1B · 최근 12개월 FCF −424억 달러", "good": false}
+  ],
+  "guidance": [
+    {"label": "4분기 매출", "value": "$240B ~ $247B", "note": "전년비 +12~16%, 컨센 약 $244.2B — 중간값이 컨센보다 낮음"},
+    {"label": "4분기 영업이익", "value": "$28.5B ~ $33.5B", "note": "전년 동기 $25.0B"},
+    {"label": "2026년 설비투자", "value": "약 $220B (유지)", "note": "2027년엔 '상당히' 더 늘어난다고 재시"},
+    {"label": "AWS 중기 성장", "value": "2027·2028년 각각 40% 이상", "note": "재시의 전망 — 5~10년 안에 1조 달러 사업"}
+  ],
+  "points": [
+    "AWS 신규 계약: 메타, 엔비디아, 오픈AI, 세일즈포스, 오라클, 퀄컴, 버라이즌 등. '설치하는 속도만큼 팔린다' — AI 칩을 약 14초마다 하나씩 설치 중.",
+    "북미 리테일 영업이익 $8.7B(전년 $4.8B) — 비용 효율화·물류 개선으로 커머스 마진도 크게 개선.",
+    "프라임데이가 올해는 대부분 2분기에 열려 3분기 매출 성장률이 약 4%p 낮아 보인다.",
+    "영업외 손익이 전년 +107억 달러 → −12억 달러로 바뀌고 이자비용이 $0.5B → $1.7B로 늘었다 — 투자 재원을 빚으로도 조달 중.",
+    "기타: 아마존 레오(저궤도 위성) AT&T 계약, 죽스(Zoox) 로보택시 확대."
+  ],
+  "tone": {
+    "label": "낙관",
+    "text": "재시는 '기회는 여전히 엄청나다', '고객이 용량을 집어삼키고 있다'며 AWS 40%+ 성장을 2028년까지 내다봤다. 현금 소진에 대해서는 '투자 수익률이 매력적'이라는 원론적 설명에 그쳤다."
+  },
+  "qa": [
+    {"q": "설비투자는 언제 줄어드나?", "a": "2026년 약 2,200억 달러 유지, 2027년엔 상당히 더 늘어난다고 답함. 매력적인 수익을 확인할 수 있다는 설명."},
+    {"q": "AWS 성장은 지속 가능한가?", "a": "2027·2028년 모두 40% 이상 성장을 예상, 장기적으로 1조 달러 이상 사업이 된다고 전망."}
+  ],
+  "macro": [
+    "AWS는 소비가 아닌 기업 AI 투자에 연결된 사업 — 매출 +39%는 AI 설비투자 사이클이 계속 가속 중이라는 신호.",
+    "리테일 쪽 4분기 가이던스가 신중 — 연말 소비 둔화 가능성을 회사가 반영했을 수 있다(소매 판매·실업수당 청구 같이 볼 것).",
+    "빅테크 4곳 중 3곳(알파벳·아마존·메타)이 현금흐름 압박 — 회사채 발행이 늘면 장기 금리·신용 스프레드에 부담."
+  ],
+  "druck_lens": [
+    "SD가 '인프라 다음은 활용 사례'라고 할 때 아마존은 양쪽에 다 걸쳐 있다: AWS(인프라 임대)와 리테일·광고(AI로 비용 절감).",
+    "자금 조달 논리: 분기 설비투자가 예상보다 190억 달러 많았고 12개월 FCF −424억 달러. 알파벳과 함께 'AI 투자 > 현금 창출' 구간 진입.",
+    "가격 vs 뉴스: AWS 가속에도 주가 −7% — 시장이 현금흐름을 더 신경 쓰기 시작했는지 확인 (알파벳과 같은 패턴)."
+  ],
+  "watch": [
+    "4분기 연말 쇼핑 실적 vs 신중한 가이던스",
+    "2027년 설비투자 공식 숫자와 회사채 발행",
+    "AWS 40% 이상 성장이 4분기에도 유지되는지",
+    "트레이니움(자체 AI 칩) 비중 확대 — 엔비디아 의존도"
+  ],
+  "caveats": [
+    "3분기 설비투자 $77.3B는 언론(Kaohoon, 컨센 비교) 보도 수치이며, 회사 자료의 '현금 설비투자'와 리스 포함 기준이 다를 수 있습니다.",
+    "전문 녹취록 대신 회사 발표와 AP·언론 보도로 정리했습니다."
+  ],
+  "sources": [
+    {"title": "About Amazon — 3분기 실적 발표", "url": "https://aboutamazon.com/news/company-news/amazon-earnings-q3-2026-report"},
+    {"title": "Constellation Research — AWS·컨센서스", "url": "https://www.constellationr.com/insights/news/aws-q3-revenue-growth-surges-39-capex-stings-amazons-cash-flow"},
+    {"title": "AP (ClickOnDetroit) — 4분기 가이던스", "url": "https://www.clickondetroit.com/business/2026/10/29/amazons-3q-results-miss-analysts-estimates-but-posts-solid-sales-gains-in-cloud-computing-unit/"},
+    {"title": "AP (MyNews13) — 재시 발언", "url": "https://mynews13.com/fl/orlando/ap-top-news/2026/10/29/amazons-3q-results-miss-analysts-estimates-but-posts-solid-sales-gains-in-cloud-computing-unit"},
+    {"title": "Kaohoon — 설비투자 vs 예상, 주가", "url": "https://www.kaohooninternational.com/?p=593541"},
+    {"title": "ifyouspent — 영업이익 vs 가이던스, 이자비용", "url": "https://news.ifyouspent.com/en/news/amazon-earnings-results-october-2026"}
+  ]
+}

@@ -253,7 +253,7 @@ def _home(results: list[ToolResult], layer_groups, etc_pages, earnings: list[dic
              f"<div class='md'>도구 {len(results)}개를 SD의 읽는 순서로 — {layers}</div>"
              f"<div class='mdots'>{dots}</div></a>"]
     if earnings is not None:
-        latest = ", ".join(f"{d.get('ticker')} {d.get('period')}" for d in earnings[:3]) or "아직 없음"
+        latest = ", ".join(f"{d.get('company') or d.get('ticker')} {d.get('period')}" for d in earnings[:3]) or "아직 없음"
         views.append(f"<a class='mcard' href='#earnings'><div class='mt'>실적·컨콜</div>"
                      f"<div class='md'>주요 기업 실적 숫자 · 가이던스 · 질의응답 쟁점 · 매크로 연결 — 정리본 {len(earnings)}개</div>"
                      f"<div class='md'>최근: {html.escape(latest)}</div></a>")

@@ -1,6 +1,7 @@
 {
   "ticker": "NVDA",
   "company": "엔비디아",
+  "region": "미국",
   "sector": "IT · 반도체",
   "ai_role": "인프라",
   "period": "FY2027 3분기",
@@ -10,18 +11,64 @@
   "verdict": "good",
   "headline": "숫자는 또 크게 이겼다 — 매출 1,158억 달러(+103%), 다음 분기 1,300억 가이던스, 내년 성장률 전망도 70%→약 75%로 상향. 다만 젠슨 황 사임 직후 첫 컨콜이라 시장의 질문은 숫자보다 리더십·중국·자금 조달에 쏠렸다.",
   "numbers": [
-    {"label": "매출", "value": "$115.8B", "vs": "컨센 약 $109.1B · 회사 가이던스 $108B 상회", "good": true},
-    {"label": "조정 EPS", "value": "$2.68", "vs": "컨센 약 $2.47 (+8%)", "good": true},
-    {"label": "데이터센터 매출", "value": "$107.6B", "vs": "전년비 +110% · 전분기비 +21%", "good": true},
-    {"label": "엣지 컴퓨팅 매출", "value": "$8.2B", "vs": "전년비 +42% · 전분기비 +14%", "good": true},
-    {"label": "총이익률 (조정)", "value": "74.9%", "vs": "전분기 75.0% → 소폭 하락 (루빈 초기 램프)", "good": null},
-    {"label": "주주환원", "value": "$28.1B", "vs": "자사주 잔여 한도 $227.3B (9월 $150B 증액)", "good": null}
+    {
+      "label": "매출",
+      "value": "$115.8B",
+      "vs": "컨센 약 $109.1B · 회사 가이던스 $108B 상회",
+      "good": true
+    },
+    {
+      "label": "조정 EPS",
+      "value": "$2.68",
+      "vs": "컨센 약 $2.47 (+8%)",
+      "good": true
+    },
+    {
+      "label": "데이터센터 매출",
+      "value": "$107.6B",
+      "vs": "전년비 +110% · 전분기비 +21%",
+      "good": true
+    },
+    {
+      "label": "엣지 컴퓨팅 매출",
+      "value": "$8.2B",
+      "vs": "전년비 +42% · 전분기비 +14%",
+      "good": true
+    },
+    {
+      "label": "총이익률 (조정)",
+      "value": "74.9%",
+      "vs": "전분기 75.0% → 소폭 하락 (루빈 초기 램프)",
+      "good": null
+    },
+    {
+      "label": "주주환원",
+      "value": "$28.1B",
+      "vs": "자사주 잔여 한도 $227.3B (9월 $150B 증액)",
+      "good": null
+    }
   ],
   "guidance": [
-    {"label": "4분기 매출", "value": "$130.0B ± 3%", "note": "컨센 약 $124.9B 상회. 한 주가 더 있는 분기이고, 중국 데이터센터 매출은 0으로 가정"},
-    {"label": "4분기 총이익률", "value": "71.0% ~ 72.0%", "note": "3분기 74.9%에서 약 3%p 하락 — 루빈 생산 초기 비용"},
-    {"label": "4분기 영업비용 (조정)", "value": "약 $10.7B", "note": "3분기 $8.8B에서 증가"},
-    {"label": "FY2028 매출 성장", "value": "약 75%", "note": "8월 전망 약 70%에서 상향 (더 높아진 FY2027 기준으로)"}
+    {
+      "label": "4분기 매출",
+      "value": "$130.0B ± 3%",
+      "note": "컨센 약 $124.9B 상회. 한 주가 더 있는 분기이고, 중국 데이터센터 매출은 0으로 가정"
+    },
+    {
+      "label": "4분기 총이익률",
+      "value": "71.0% ~ 72.0%",
+      "note": "3분기 74.9%에서 약 3%p 하락 — 루빈 생산 초기 비용"
+    },
+    {
+      "label": "4분기 영업비용 (조정)",
+      "value": "약 $10.7B",
+      "note": "3분기 $8.8B에서 증가"
+    },
+    {
+      "label": "FY2028 매출 성장",
+      "value": "약 75%",
+      "note": "8월 전망 약 70%에서 상향 (더 높아진 FY2027 기준으로)"
+    }
   ],
   "points": [
     "베라 루빈 NVL72 출하 시작 — 회사는 '역사상 가장 빠른 제품 램프'라고 표현. 루빈 플랫폼에 HPC용 GPU도 추가.",
@@ -36,9 +83,18 @@
     "text": "크레스는 '모멘텀은 진짜다', '평소대로 사업 중'을 반복하며 숫자로 불안을 누르려 했다. 이사회는 황 관련 질문을 아예 받지 않았고, 하이퍼스케일 책임자 이안 벅이 질의응답에 함께 나와 기술 리더십의 연속성을 보여주려 했다."
   },
   "qa": [
-    {"q": "내년(FY2028) 성장이 왜 더 빨라지나?", "a": "고객과의 대화에서 나온 수요를 근거로 들며 약 75% 성장을 제시. 구체적인 고객별 숫자는 내놓지 않았다."},
-    {"q": "젠슨 황 사임·조사 관련", "a": "의장이 콜 시작부터 '질문 받지 않는다'고 선을 그음. 후임 CEO는 서두르지 않고 맞는 사람을 찾겠다고만 언급."},
-    {"q": "직원·고객·공급망 동요는?", "a": "직원 지원에 집중하고 있으며 고객·공급사·파트너와는 '평소대로'라고 답함."}
+    {
+      "q": "내년(FY2028) 성장이 왜 더 빨라지나?",
+      "a": "고객과의 대화에서 나온 수요를 근거로 들며 약 75% 성장을 제시. 구체적인 고객별 숫자는 내놓지 않았다."
+    },
+    {
+      "q": "젠슨 황 사임·조사 관련",
+      "a": "의장이 콜 시작부터 '질문 받지 않는다'고 선을 그음. 후임 CEO는 서두르지 않고 맞는 사람을 찾겠다고만 언급."
+    },
+    {
+      "q": "직원·고객·공급망 동요는?",
+      "a": "직원 지원에 집중하고 있으며 고객·공급사·파트너와는 '평소대로'라고 답함."
+    }
   ],
   "macro": [
     "4분기 총이익률 71~72% 가이던스는 이익 증가율이 매출 증가율보다 낮아진다는 뜻 — S&P 500 이익에서 엔비디아 비중이 큰 만큼 지수 이익 전망에도 영향 (이익 역풍 툴과 같이 보기).",
@@ -64,10 +120,25 @@
     "컨센서스 숫자는 출처(LSEG, 벤징가 등)마다 조금씩 다릅니다."
   ],
   "sources": [
-    {"title": "NVIDIA 3Q FY2027 실적 발표 (회사 IR)", "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/default.aspx"},
-    {"title": "Constellation Research — 4분기·FY2028 전망 상향", "url": "https://www.constellationr.com/insights/news/nvidia-posts-strong-q3-ups-q4-fiscal-2028-outlook-amid-huang-resignation"},
-    {"title": "GamesBeat — 크레스·존스 컨콜 발언", "url": "https://gamesbeat.com/?p=339384"},
-    {"title": "Stock Analysis — 실적 요약", "url": "https://stockanalysis.com/news/nvda-q3-fy2027-earnings-beat/"},
-    {"title": "The National — 주가·시총 반응", "url": "https://www.thenationalnews.com/business/markets/2026/11/17/nvidia-earnings-q3-jensen-huang/"}
+    {
+      "title": "NVIDIA 3Q FY2027 실적 발표 (회사 IR)",
+      "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Third-Quarter-Fiscal-2027/default.aspx"
+    },
+    {
+      "title": "Constellation Research — 4분기·FY2028 전망 상향",
+      "url": "https://www.constellationr.com/insights/news/nvidia-posts-strong-q3-ups-q4-fiscal-2028-outlook-amid-huang-resignation"
+    },
+    {
+      "title": "GamesBeat — 크레스·존스 컨콜 발언",
+      "url": "https://gamesbeat.com/?p=339384"
+    },
+    {
+      "title": "Stock Analysis — 실적 요약",
+      "url": "https://stockanalysis.com/news/nvda-q3-fy2027-earnings-beat/"
+    },
+    {
+      "title": "The National — 주가·시총 반응",
+      "url": "https://www.thenationalnews.com/business/markets/2026/11/17/nvidia-earnings-q3-jensen-huang/"
+    }
   ]
 }

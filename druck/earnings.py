@@ -5,6 +5,8 @@
 
 필드 (없는 필드는 그냥 빠진다)
   ticker, company, sector, period, period_end, call_date, updated
+  region        "미국" | "그 외"  — 화면을 미국 / 그 외 국가로 나눈다 (없으면 "미국")
+  country       그 외 국가일 때 나라 이름 (예: "대만", "한국")
   ai_role       "인프라" | "활용 사례" | "둘 다" | "" — SD 2026: 인프라보다 활용 사례를 본다
   headline      한 줄 결론
   verdict       "good" | "mixed" | "bad"  (실적 자체의 평가 — 주가 판단 아님)
@@ -22,11 +24,30 @@
 from __future__ import annotations
 
 import html
+import re
 import json
 from pathlib import Path
 
 DEFAULT_DIR = Path(__file__).resolve().parent.parent / "earnings"
 VERDICT = {"good": ("ok", "좋음"), "mixed": ("watch", "엇갈림"), "bad": ("alert", "나쁨")}
+REGIONS = [("us", "미국"), ("intl", "그 외 국가")]
+
+
+def region(d: dict) -> str:
+    """'us' 또는 'intl'."""
+    r = str(d.get("region") or "미국").strip()
+    return "us" if r in ("미국", "US", "us", "USA") else "intl"
+
+
+def _anchor(d: dict) -> str:
+    f = d.get("_file") or f"{d.get('ticker')}/{d.get('period')}"
+    return "e-" + re.sub(r"[^0-9A-Za-z가-힣_-]+", "-", f.rsplit(".", 1)[0].replace("/", "-")).strip("-")
+
+
+def _first_sentence(t: str) -> str:
+    t = str(t or "")
+    m = re.search(r"[.。]\s", t)
+    return t[: m.start() + 1] if m and m.start() < 140 else (t if len(t) <= 140 else t[:138] + "…")
 
 
 def load(folder: str | Path | None = None) -> list[dict]:
@@ -78,13 +99,13 @@ def _card(d: dict) -> str:
         f"기간 종료 {_e(d['period_end'])}" if d.get("period_end") else "",
         f"컨콜 {_e(d['call_date'])}" if d.get("call_date") else "",
         f"정리 {_e(d['updated'])}" if d.get("updated") else ""] if x)
-    tags = "".join(f"<span class='tag'>{_e(t)}</span>" for t in [d.get("sector"), d.get("ai_role") and f"AI: {d['ai_role']}"] if t)
+    tags = "".join(f"<span class='tag'>{_e(t)}</span>" for t in [d.get("country"), d.get("sector"), d.get("ai_role") and f"AI: {d['ai_role']}"] if t)
 
     def block(title, body, open_=False):
         return f"<details class='fold'{' open' if open_ else ''}><summary>{title}</summary>{body}</details>" if body else ""
 
     return f"""
-<section class='tool ecard {cls}' id='e-{tk}-{_e(d.get('period'))}' data-tk='{tk}'>
+<section class='tool ecard {cls}' id='{_anchor(d)}' data-tk='{tk}' data-rg='{region(d)}'>
   <div class='th'><span class='badge {cls}'>{vtxt}</span><h2>{tk} <span class='cname'>{_e(d.get('company'))}</span> · {_e(d.get('period'))}</h2>
     <span class='asof'>{meta}</span></div>
   <div class='tags'>{tags}</div>
@@ -103,16 +124,45 @@ def _card(d: dict) -> str:
 </section>"""
 
 
+def _overview(items: list[dict]) -> str:
+    """지역별 한눈 표: 기업 · 기간 · 평가 · 한 줄."""
+    out = []
+    for rg, name in REGIONS:
+        rows = [d for d in items if region(d) == rg]
+        if not rows:
+            continue
+        trs = "".join(
+            f"<tr data-rg='{rg}' data-tk='{_e(d.get('ticker'))}'><td><a href='#{_anchor(d)}'><b>{_e(d.get('company') or d.get('ticker'))}</b></a>"
+            f"<div class='etk'>{_e(d.get('ticker'))}{' · ' + _e(d.get('country')) if d.get('country') else ''}</div></td>"
+            f"<td>{_e(d.get('period'))}<div class='etk'>컨콜 {_e(d.get('call_date'))}</div></td>"
+            f"<td><span class='badge {VERDICT.get(d.get('verdict', ''), ('na', ''))[0]}'>{VERDICT.get(d.get('verdict', ''), ('na', '평가 없음'))[1]}</span></td>"
+            f"<td class='eone'>{_e(_first_sentence(d.get('headline')))}</td></tr>" for d in rows)
+        out.append(f"<div class='erg' data-rg='{rg}'><h3 class='eh'>{name} <span class='cnt'>{len(rows)}</span></h3>"
+                   f"<div class='tblwrap'><table class='tbl eov'><thead><tr><th>기업</th><th>기간</th><th>평가</th><th>한 줄</th></tr></thead>"
+                   f"<tbody>{trs}</tbody></table></div></div>")
+    return f"<section class='tool overview'>{''.join(out)}</section>" if out else ""
+
+
 def view(items: list[dict], sub: str = "") -> str:
-    """리포트의 '실적·컨콜' 화면 (id='v-earnings')."""
-    tickers = list(dict.fromkeys(d.get("ticker") for d in items))
-    chips = "<a href='#' class='on' data-f=''>전체</a>" + "".join(f"<a href='#' data-f='{_e(t)}'>{_e(t)}</a>" for t in tickers)
+    """리포트의 '실적·컨콜' 화면 (id='v-earnings'). 미국 / 그 외 국가로 나눈다."""
+    n_rg = {rg: sum(region(d) == rg for d in items) for rg, _ in REGIONS}
+    rchips = f"<a href='#' class='on' data-r=''>전체 <span class='cnt'>{len(items)}</span></a>" + "".join(
+        f"<a href='#' data-r='{rg}'>{name} <span class='cnt'>{n_rg[rg]}</span></a>" for rg, name in REGIONS if n_rg[rg])
+    seen, chips = set(), "<a href='#' class='on' data-f=''>전체 기업</a>"
+    for d in sorted(items, key=lambda d: (region(d) != "us", str(d.get("company") or d.get("ticker")))):
+        t = d.get("ticker")
+        if t in seen:
+            continue
+        seen.add(t)
+        chips += f"<a href='#' data-f='{_e(t)}' data-rg='{region(d)}'>{_e(d.get('company') or t)}</a>"
     body = "".join(_card(d) for d in items) or (
         "<section class='tool overview'><p class='headline'>아직 정리한 컨콜이 없습니다.</p>"
         "<p class='rule'>earnings/티커/기간.json 파일을 추가하면 여기에 나타납니다. 형식: earnings/_template.json</p></section>")
     return f"""<div class='view' id='v-earnings' data-title='실적·컨콜'>
-<h2 class='vt'>실적·컨콜 정리</h2><div class='sub'>{sub}{' · ' if sub else ''}정리본 {len(items)}개 · 기업 {len(tickers)}곳 · 최근 컨콜이 위</div>
-<div class='efilter'>{chips}</div>
+<h2 class='vt'>실적·컨콜 정리</h2><div class='sub'>{sub}{' · ' if sub else ''}정리본 {len(items)}개 · 기업 {len(seen)}곳 · 최근 컨콜이 위 · 기업 이름을 누르면 해당 카드로</div>
+<div class='efilter rg'>{rchips}</div>
+{_overview(items)}
+<div class='efilter tk'>{chips}</div>
 {body}
 </div>"""
 
@@ -126,12 +176,27 @@ CSS = """
 .ecard .eh{font-size:15px;margin:16px 0 4px}
 .qa{padding:8px 0;border-bottom:1px dashed var(--line);font-size:14.5px} .qa:last-child{border-bottom:0}
 .qa .q{font-weight:600} .qa .a{color:var(--mute);margin-top:2px}
+.efilter.rg a{font-size:14px;font-weight:600;padding:6px 16px}
+.efilter .cnt{font-weight:400;opacity:.7;margin-left:2px}
+.erg{margin-top:4px} .erg + .erg{margin-top:18px}
+.eov td{vertical-align:top} .eov td:first-child{white-space:nowrap} .eov a{color:var(--ink)}
+.etk{font-size:12px;color:var(--mute)} .eone{font-size:13.5px;color:var(--mute);min-width:260px}
 """
 
 JS = """
-document.querySelectorAll('.efilter a').forEach(a=>a.addEventListener('click',e=>{
-  e.preventDefault(); const f=a.dataset.f;
-  document.querySelectorAll('.efilter a').forEach(x=>x.classList.toggle('on',x===a));
-  document.querySelectorAll('.ecard').forEach(c=>c.style.display=(!f||c.dataset.tk===f)?'':'none');
-}));
+(function(){
+  const st={r:'',f:''};
+  const apply=()=>{
+    document.querySelectorAll('.efilter.rg a').forEach(x=>x.classList.toggle('on',x.dataset.r===st.r));
+    document.querySelectorAll('.efilter.tk a').forEach(x=>{
+      x.classList.toggle('on',x.dataset.f===st.f);
+      x.style.display=(!x.dataset.rg||!st.r||x.dataset.rg===st.r)?'':'none';});
+    const ok=el=>(!st.r||el.dataset.rg===st.r)&&(!st.f||el.dataset.tk===st.f);
+    document.querySelectorAll('.ecard').forEach(c=>c.style.display=ok(c)?'':'none');
+    document.querySelectorAll('.eov tbody tr').forEach(r=>r.style.display=ok(r)?'':'none');
+    document.querySelectorAll('.erg').forEach(g=>g.style.display=(!st.r||g.dataset.rg===st.r)?'':'none');
+  };
+  document.querySelectorAll('.efilter.rg a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();st.r=a.dataset.r;st.f='';apply();}));
+  document.querySelectorAll('.efilter.tk a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();st.f=a.dataset.f;apply();}));
+})();
 """

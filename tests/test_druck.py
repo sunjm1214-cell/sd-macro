@@ -289,3 +289,24 @@ def test_markets_changes_and_units(ctx):
     m = build(ctx)
     ok = [x for g in m["groups"] for x in g["rows"] if "last" in x]
     assert len(ok) >= 25 and any(g["curve"] for g in m["groups"])
+
+
+def test_earnings_region_split(tmp_path):
+    import json
+    from druck.earnings import load, region, view
+    for tk, rg in (("AAA", "미국"), ("BBB", "그 외"), ("CCC", None)):
+        (tmp_path / tk).mkdir()
+        d = {"company": tk.lower(), "call_date": "2026-01-01", "headline": "첫 문장. 둘째 문장."}
+        if rg:
+            d["region"] = rg
+        (tmp_path / tk / "2026Q1.json").write_text(json.dumps(d), encoding="utf-8")
+    items = load(tmp_path)
+    assert [region(d) for d in sorted(items, key=lambda d: d["ticker"])] == ["us", "intl", "us"]  # 없으면 미국
+    h = view(items)
+    assert "그 외 국가" in h and "data-rg='intl'" in h and "href='#e-BBB-2026Q1'" in h and "id='e-BBB-2026Q1'" in h
+
+
+def test_repo_earnings_have_region():
+    from druck.earnings import load
+    for d in load():
+        assert d.get("region") in ("미국", "그 외"), d["_file"]

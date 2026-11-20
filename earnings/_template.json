@@ -1,6 +1,8 @@
 {
   "ticker": "TICKER",
   "company": "회사 이름",
+  "region": "미국 | 그 외",
+  "country": "그 외 국가일 때 나라 (예: 대만) — 미국이면 지우기",
   "sector": "섹터",
   "ai_role": "인프라 | 활용 사례 | 둘 다 | (비워두기)",
   "period": "FY2027 3분기",
