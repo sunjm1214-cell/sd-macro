@@ -1,0 +1,4 @@
+pandas>=2.0
+numpy>=1.24
+# 선택: 업종 리더십 툴 (sector_leadership)
+yfinance>=0.2

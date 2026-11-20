@@ -1,0 +1,58 @@
+{
+  "ticker": "TICKER",
+  "company": "회사 이름",
+  "sector": "섹터",
+  "ai_role": "인프라 | 활용 사례 | 둘 다 | (비워두기)",
+  "period": "FY2027 3분기",
+  "period_end": "YYYY-MM-DD",
+  "call_date": "YYYY-MM-DD",
+  "updated": "YYYY-MM-DD",
+  "verdict": "good | mixed | bad",
+  "headline": "한 줄 결론",
+  "numbers": [
+    {
+      "label": "매출",
+      "value": "$0.0B",
+      "vs": "컨센 대비 …",
+      "good": true
+    }
+  ],
+  "guidance": [
+    {
+      "label": "다음 분기 매출",
+      "value": "…",
+      "note": "…"
+    }
+  ],
+  "points": [
+    "…"
+  ],
+  "tone": {
+    "label": "자신감 | 신중 | 방어적",
+    "text": "…"
+  },
+  "qa": [
+    {
+      "q": "…",
+      "a": "…"
+    }
+  ],
+  "macro": [
+    "…"
+  ],
+  "druck_lens": [
+    "…"
+  ],
+  "watch": [
+    "…"
+  ],
+  "caveats": [
+    "…"
+  ],
+  "sources": [
+    {
+      "title": "…",
+      "url": "https://…"
+    }
+  ]
+}
