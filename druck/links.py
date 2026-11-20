@@ -76,12 +76,13 @@ SERIES_NAMES: dict[str, str] = {
     "WTREGEN": "재무부 일반계정(TGA)", "ECBASSETSW": "ECB 총자산", "JPNASSETS": "일본은행 총자산",
     "DEXUSEU": "달러/유로 환율", "DEXJPUS": "엔/달러 환율", "ECBDFR": "ECB 예금금리", "IRSTCI01JPM156N": "일본 콜금리(월)",
     "DFII10": "10년 실질금리(TIPS)", "DGS10": "10년물 국채금리(일별)",
+    "DFEDTARU": "연방기금 목표금리 상단(일별)", "DGS2": "2년물 국채금리(일별)",
 }
 TICKER_NAMES: dict[str, str] = {
     "SPY": "S&P 500", "GLD": "금", "XRT": "소매", "IYT": "운송", "ITB": "주택건설", "IWM": "러셀2000",
     "XME": "금속·광업", "XLP": "필수소비재", "XLU": "유틸리티",
     "CPER": "구리", "RSP": "S&P 500 동일가중", "EEM": "신흥국 주식", "EMB": "신흥국 달러 국채", "IEF": "미 7~10년 국채",
-    "HG=F": "구리 선물", "GC=F": "금 선물",
+    "HG=F": "구리 선물", "GC=F": "금 선물", "CL=F": "WTI 원유 선물", "USO": "원유 ETF", "DBC": "원자재 종합 ETF",
 }
 
 

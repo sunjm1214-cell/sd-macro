@@ -16,7 +16,9 @@ TomorrowX Summit 2026 (iConnections, Morgan Stanley 일리아나 부잘리 진�
 원칙: 명확할 때 크게, 명확하지 않으면 거의 안 한다. 그래도 그는 AI 혁신과 이미 씻겨 나간 포지션 때문에
 "감히 숏은 못 한다"고 했다 — 신호가 반대로 정렬돼도 이 툴은 '공매도'가 아니라 '비중 축소·관망'의 근거로 쓴다.
 
-yfinance가 필요하다 (구리 CPER, 동일가중 RSP, 업종 ETF).
+화면은 '1월과 비교'가 아니라 지금 상태를 보여준다: 각 항목의 현재 판정·근거 수치와 '확장 쪽이 되려면' 기준.
+원자재는 구리 하나가 아니라 원자재 종합·구리·원유 바스켓으로 본다 (그는 구리만이 아니라 원자재 전반을 봤다).
+데이터: 기준금리는 일별 목표금리(DFEDTARU), 시장 기대는 2년물(DGS2), Baa 스프레드도 일별. 명목 GDP만 분기.
 """
 from __future__ import annotations
 
@@ -52,33 +54,45 @@ def _basket(ctx: Context, tickers) -> pd.Series:
          "이것들이 엇갈리거나 뒤집히면 '안 한다' — 돈을 버는 것보다 잃지 않는 것이 목표가 된다.",
     sources=[("TomorrowX Summit 2026 — 'I'm not playing' (1월 vs 지금 체크리스트)", VIDEO)],
     order=0,
-    series=["GDP", "FEDFUNDS", "BAA10Y", "BAMLH0A0HYM2"],
+    series=["GDP", "DFEDTARU", "FEDFUNDS", "DGS2", "BAA10Y", "BAMLH0A0HYM2"],
     layer="유동성·연준",
     use="사이즈",
     lead="6~12개월",
-    tickers=["CPER", "RSP", "SPY", *CYCLICALS, *DEFENSIVES],
+    tickers=["HG=F", "CPER", "CL=F", "USO", "DBC", "RSP", "SPY", *CYCLICALS, *DEFENSIVES],
 )
 def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months: int = 6, fed_turn: float = 0.1,
         cu_near_high: float = -5.0, cu_topped: float = -12.0, breadth_off_high: float = -4.0, breadth_lag_days: int = 30,
         spread_tight_pct: float = 30.0, spread_widen: float = 0.3, hy_widen: float = 0.4, rel_months: int = 6,
-        rel_band: float = 3.0, clear_share: float = 0.8) -> ToolResult:
+        rel_band: float = 3.0, clear_share: float = 0.8, mkt_gap: float = 0.25, y2_move: float = 0.3) -> ToolResult:
     rows: list[dict] = []
 
-    def add(item, now, jan, state, value):
-        rows.append({"항목": item, "1월(크게 걸 때)": jan, "지금 판정": state, "근거 수치": value, "_s": now})
+    def add(item, now, need, state, value):
+        rows.append({"항목": item, "지금 상태": state, "근거 수치": value, "확장 쪽이 되려면": need, "_s": now})
+
+    # 기준금리: 일별 목표금리 상단(DFEDTARU) — 결정 다음 날 반영. 없으면 월평균 FEDFUNDS
+    rate = ctx.try_series("DFEDTARU")
+    rate_name = "목표금리 상단"
+    if rate is None or len(rate) < 300:
+        rate, rate_name = ctx.try_series("FEDFUNDS"), "실효 기준금리(월평균)"
+
+    def ago(sr, days):
+        old = sr[sr.index <= sr.index[-1] - pd.Timedelta(days=days)]
+        return float(old.iloc[-1]) if len(old) else float(sr.iloc[0])
 
     # 1) 통화정책 수준: 기준금리 vs 명목성장 ("기준금리 3.5%, 명목성장은 그보다 높다 → 터무니없이 완화")
     try:
-        ff = to_freq(ctx.series("FEDFUNDS"), "M")
-        ngdp = float(yoy_pct(ctx.series("GDP"), 4).dropna().iloc[-1])
-        gap = ngdp - float(ff.iloc[-1])
+        if rate is None:
+            raise DataUnavailable("기준금리 없음")
+        g = yoy_pct(ctx.series("GDP"), 4).dropna()
+        ngdp, ff = float(g.iloc[-1]), float(rate.iloc[-1])
+        q = pd.Timestamp(g.index[-1])
+        gap = ngdp - ff
         s = UP if gap >= loose_gap else (DOWN if gap <= 0 else MID)
-        add("통화정책 수준 (명목성장 − 기준금리)", s, "완화: 기준금리가 명목성장보다 한참 낮음",
+        add("통화정책 수준 (명목성장 − 기준금리)", s, f"명목성장이 기준금리보다 {loose_gap:.1f}%p 이상 높음",
             {UP: "완화적", DOWN: "긴축적", MID: "중립 근처"}[s],
-            f"명목성장 {ngdp:.1f}% − 기준금리 {ff.iloc[-1]:.2f}% = {gap:+.1f}%p")
-        # 2) 연준 방향 ("연준이 인하가 아니라 인상 중")
-        chg = float(ff.iloc[-1] - ff.iloc[-1 - fed_months])
-        chg3 = float(ff.iloc[-1] - ff.iloc[-4])
+            f"명목성장 {ngdp:.1f}%({q.year}년 {q.quarter}분기) − {rate_name} {ff:.2f}% = {gap:+.1f}%p")
+        # 2) 연준 방향 — 실제 결정 ("연준이 인하가 아니라 인상 중")
+        chg, chg3 = ff - ago(rate, fed_months * 30), ff - ago(rate, 91)
         s = UP if chg <= -fed_move else (DOWN if chg >= fed_move else MID)
         label = {UP: "인하 중", DOWN: "인상 중", MID: "동결"}[s]
         # 전환은 6개월 합계보다 먼저 보인다: 인하 뒤 최근 3개월에 인상이 나오면 '인상 전환'(2026-11 그가 물러선 첫 이유)
@@ -86,22 +100,54 @@ def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months
             s, label = DOWN, "인상 전환"
         elif s != UP and chg3 <= -fed_turn:
             s, label = UP, "인하 전환"
-        add("연준 방향", s, "인하 예정(점도표)", label,
-            f"최근 {fed_months}개월 기준금리 {chg:+.2f}%p, 3개월 {chg3:+.2f}%p")
+        add("연준 방향 (실제 결정)", s, "인하 중이거나 인하로 전환", label,
+            f"{rate_name} 지금 {ff:.2f}% · 6개월 {chg:+.2f}%p · 3개월 {chg3:+.2f}%p")
     except DataUnavailable as e:
         add("통화정책", None, "-", "데이터 없음", str(e))
 
-    # 3) 원자재: 구리 ("1월엔 신고가 돌파 → 지금은 천장 찍고 하락, 구리 숏")
+    # 2-b) 시장의 연준 기대 — 2년물 ("점도표상 인하 예정" → 지금은 시장이 무엇을 가격에 넣었나)
     try:
-        cu = ctx.price("CPER")
-        w = cu.iloc[-252:]
-        off = float((cu.iloc[-1] / w.max() - 1) * 100)
-        above = bool(cu.iloc[-1] > cu.iloc[-200:].mean())
-        s = UP if (off >= cu_near_high and above) else (DOWN if (off <= cu_topped or not above) else MID)
-        add("원자재 (구리)", s, "신고가 돌파", {UP: "고점권 · 상승 추세", DOWN: "고점 대비 하락 · 추세 이탈", MID: "애매"}[s],
-            f"52주 고점 대비 {off:+.1f}%, 200일선 {'위' if above else '아래'}")
+        y2 = ctx.series("DGS2").dropna()
+        if rate is None:
+            raise DataUnavailable("기준금리 없음")
+        now2, ff = float(y2.iloc[-1]), float(rate.iloc[-1])
+        spread, d2 = now2 - ff, now2 - ago(y2, 91)
+        if spread <= -mkt_gap and d2 <= 0:
+            s, label = UP, "인하를 가격에 반영"
+        elif spread >= mkt_gap or d2 >= y2_move:
+            s, label = DOWN, "인상(또는 인하 축소)을 가격에 반영"
+        else:
+            s, label = MID, "동결 근처"
+        add("시장의 연준 기대 (2년물)", s, "2년물이 기준금리보다 낮고 내려가는 중", label,
+            f"2년물 {now2:.2f}% − 기준금리 {ff:.2f}% = {spread:+.2f}%p · 2년물 3개월 {d2 * 100:+.0f}bp")
     except DataUnavailable as e:
-        add("원자재 (구리)", None, "-", "데이터 없음", str(e))
+        add("시장의 연준 기대", None, "-", "데이터 없음", str(e))
+
+    # 3) 원자재 — 구리 하나가 아니라 바스켓 ("원자재·구리 신고가 돌파 → 천장 찍고 하락")
+    comms = []
+    for name, tks in (("원자재 종합", ["DBC"]), ("구리", ["HG=F", "CPER"]), ("원유", ["CL=F", "USO"])):
+        for tk in tks:
+            try:
+                px = ctx.price(tk).dropna()
+                if len(px) < 252:
+                    continue
+                off = float((px.iloc[-1] / px.iloc[-252:].max() - 1) * 100)
+                above = bool(px.iloc[-1] > px.iloc[-200:].mean())
+                st = UP if (off >= cu_near_high and above) else (DOWN if (off <= cu_topped or not above) else MID)
+                comms.append((name, st, off, above))
+                break
+            except DataUnavailable:
+                continue
+    if comms:
+        ups = sum(c[1] == UP for c in comms)
+        downs = sum(c[1] == DOWN for c in comms)
+        s = UP if ups > len(comms) / 2 else (DOWN if downs > len(comms) / 2 else MID)
+        detail = " · ".join(f"{n} 고점 대비 {o:+.1f}%({'200일선 위' if a_ else '200일선 아래'})" for n, _, o, a_ in comms)
+        add("원자재 (종합·구리·원유)", s, f"과반이 52주 고점 {cu_near_high:.0f}% 이내 + 200일선 위",
+            {UP: f"상승 추세 ({ups}/{len(comms)})", DOWN: f"고점 대비 하락 · 추세 이탈 ({downs}/{len(comms)})", MID: "엇갈림"}[s],
+            detail)
+    else:
+        add("원자재", None, "-", "데이터 없음", "원자재 가격을 받지 못함")
 
     # 4) 시장 폭 — A/D 선 대용: 동일가중 S&P(RSP)가 지수와 함께 고점을 만드는가, 먼저 꺾였나
     #    (RSP÷SPY 비율 '수준'은 대형주 집중으로 수년째 구조적으로 내려 다이버전스를 과다 판정 → 고점 '시점'으로 본다)
@@ -119,7 +165,7 @@ def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months
             s, txt = UP, "폭이 지수를 확인(동일가중도 고점권)"
         else:
             s, txt = MID, "애매"
-        add("시장 폭 (A/D 선 대용: 동일가중 S&P 고점 시점)", s, "A/D 선 신고가", txt,
+        add("시장 폭 (A/D 선 대용: 동일가중 S&P 고점 시점)", s, "동일가중 S&P도 지수와 함께 고점권", txt,
             f"동일가중 52주 고점 대비 {r_off:+.1f}%({rw.idxmax():%Y-%m-%d}), S&P 500 {spy_off:+.1f}%({sw.idxmax():%Y-%m-%d})")
     except DataUnavailable as e:
         add("시장 폭", None, "-", "데이터 없음", str(e))
@@ -128,10 +174,10 @@ def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months
     #    수준(얼마나 좁은가)은 긴 역사가 있는 Baa−10년물로, 방향(넓어지는가)은 더 민감한 하이일드로 본다.
     #    국채 금리가 크게 오르면 Baa−10년물은 좁아 보이는데 정크본드 쪽은 이미 벌어질 수 있다(2026년 8~11월).
     try:
-        sp = to_freq(ctx.series("BAA10Y"), "M")
+        sp = ctx.series("BAA10Y").dropna()
         now = float(sp.iloc[-1])
-        pct = percentile_rank(sp.iloc[-240:], now)
-        d3 = float(sp.iloc[-1] - sp.iloc[-4])
+        pct = percentile_rank(to_freq(sp, "M").iloc[-240:], now)
+        d3 = now - ago(sp, 91)
         hy_txt, hy_wide = "", False
         hy = ctx.try_series("BAMLH0A0HYM2")
         if hy is not None and len(hy) > 70:
@@ -141,7 +187,7 @@ def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months
         widening = d3 >= spread_widen or hy_wide
         s = DOWN if widening else (UP if pct <= spread_tight_pct else MID)
         label = {UP: "타이트", DOWN: "확대 중" + (" — 하이일드부터" if hy_wide and d3 < spread_widen else ""), MID: "보통"}[s]
-        add("신용 스프레드 (Baa − 10년물 · 하이일드)", s, "매우 타이트", label,
+        add("신용 스프레드 (Baa − 10년물 · 하이일드)", s, f"20년 중 하위 {spread_tight_pct:.0f}% 분위 + 넓어지지 않음", label,
             f"Baa {now:.2f}%p, 20년 중 {pct:.0f}% 분위, 3개월 {d3:+.2f}%p{hy_txt}")
     except DataUnavailable as e:
         add("신용 스프레드", None, "-", "데이터 없음", str(e))
@@ -153,7 +199,7 @@ def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months
         days = rel_months * 21
         rr = float((rel.iloc[-1] / rel.iloc[-1 - days] - 1) * 100)
         s = UP if rr >= rel_band else (DOWN if rr <= -rel_band else MID)
-        add("주도주 (경기민감 vs 방어)", s, "경기민감주 우위", {UP: "경기민감주 우위", DOWN: "방어주 주도", MID: "비슷"}[s],
+        add("주도주 (경기민감 vs 방어)", s, f"경기민감주가 {rel_months}개월간 방어주보다 {rel_band:.0f}%p 이상 앞섬", {UP: "경기민감주 우위", DOWN: "방어주 주도", MID: "비슷"}[s],
             f"경기민감 바스켓의 방어주 대비 {rel_months}개월 {rr:+.1f}%p")
     except DataUnavailable as e:
         add("주도주", None, "-", "데이터 없음", str(e))
@@ -166,7 +212,7 @@ def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months
     n = len(have)
     if up >= clear_share * n and down == 0:
         sig = Signal.OK
-        msg = "명확함 — 확장 쪽으로 정렬. 그가 '크게 걸던' 2026년 1월형 국면"
+        msg = "명확함 — 확장 쪽으로 정렬. 그가 '크게 걸던' 국면(2026년 1월이 이랬다)"
     elif down >= clear_share * n and up == 0:
         sig = Signal.ALERT
         msg = "체크리스트가 전부 반대로 뒤집힘 — 그는 이때도 숏 대신 '쉬기(자본 보존)'를 택했다"
@@ -182,11 +228,12 @@ def run(ctx: Context, loose_gap: float = 1.5, fed_move: float = 0.25, fed_months
         "A/D 선(상승·하락 종목 수 누적)은 무료 데이터가 없어 동일가중 S&P(RSP)로 대신합니다. 비율(RSP÷SPY)의 수준은 대형주 집중 때문에 수년째 구조적으로 내려가 다이버전스를 과다 판정하므로, 동일가중의 52주 고점이 지수 고점보다 30거래일 이상 먼저 나왔는지(그가 말한 'A/D 고점 8/14 vs 지수 고점 10월')로 봅니다.",
         "체크리스트가 전부 반대로 뒤집혀도 그는 공매도하지 않았습니다 — AI 혁신과 이미 씻겨 나간 포지션 때문. 경고는 '숏 신호'가 아니라 '자본 보존' 신호로 읽으세요.",
         "그의 리스크 관리는 VaR가 아니라 자기 손익(P&L): 포지션이 기대대로 움직이지 않거나 상관관계가 깨지면 줄인다. 이 체크리스트와 함께 내 계좌의 움직임을 보세요.",
-        "판정 기준값(명목성장−기준금리 1.5%p, 구리 고점 대비 −12% 등)은 이 툴의 해석이며 그가 말한 숫자가 아닙니다. --param clarity.○○=값 으로 바꿀 수 있습니다.",
+        "데이터 시점: 원자재·시장 폭·주도주·신용·금리는 전날 미국 종가(매일 아침 갱신). 명목 GDP만 분기 데이터라 최대 3~4개월 늦습니다.",
+        "판정 기준값(명목성장−기준금리 1.5%p, 원자재 고점 대비 −12%, 2년물−기준금리 ±0.25%p 등)은 이 툴의 해석이며 그가 말한 숫자가 아닙니다. --param clarity.○○=값 으로 바꿀 수 있습니다.",
     ]
     try:
         as_of = pd.Timestamp(ctx.price("SPY").index[-1]).strftime("%Y-%m-%d")
     except DataUnavailable:
         as_of = None
-    return ToolResult(sig, headline, metrics, notes, [("체크리스트: 1월 vs 지금", table)], [], as_of=as_of,
+    return ToolResult(sig, headline, metrics, notes, [("체크리스트: 지금 상태", table)], [], as_of=as_of,
                       data={"rows": rows, "up": up, "down": down, "n": n})
