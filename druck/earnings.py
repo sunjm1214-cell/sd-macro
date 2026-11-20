@@ -179,7 +179,7 @@ CSS = """
 .efilter.rg a{font-size:14px;font-weight:600;padding:6px 16px}
 .efilter .cnt{font-weight:400;opacity:.7;margin-left:2px}
 .erg{margin-top:4px} .erg + .erg{margin-top:18px}
-.eov td{vertical-align:top} .eov td:first-child{white-space:nowrap} .eov a{color:var(--ink)}
+.eov td,.eov th{vertical-align:top;text-align:left!important} .eov td:first-child{white-space:nowrap} .eov a{color:var(--ink)}
 .etk{font-size:12px;color:var(--mute)} .eone{font-size:13.5px;color:var(--mute);min-width:260px}
 """
 
