@@ -274,6 +274,7 @@ def test_reference_covers_every_source():
     assert all(n in d["owner"] for n in done)  # 읽었다고 한 자료는 모두 노트가 있다
     page = view(d)
     assert "id='ref-56'" in page and "<table" in page
+    assert "id='ref-sites'" in page and "bok.or.kr" in page and "bis.org" in page and "federalreserve.gov" in page
 
 
 def test_markets_changes_and_units(ctx):

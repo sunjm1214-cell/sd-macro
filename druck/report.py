@@ -263,14 +263,14 @@ def _home(results: list[ToolResult], layer_groups, etc_pages, earnings: list[dic
     if reference:
         n = len(reference["items"])
         views.append(f"<a class='mcard' href='#ref'><div class='mt'>참고자료</div>"
-                     f"<div class='md'>SD 인터뷰·강연·기고 {n}개 정리(1994~2026)와 그걸 합친 판단 틀</div></a>")
+                     f"<div class='md'>유용한 사이트(데이터·연준·한국은행·BIS) + SD 인터뷰·강연·기고 {n}개 정리와 그걸 합친 판단 틀</div></a>")
     ext = "".join(f"<a class='mcard ext' href='{html.escape(u)}' target='_blank' rel='noopener'>"
                   f"<div class='mt'>{html.escape(n)} <span class='arrow'>↗</span></div><div class='md'>{html.escape(d)}</div>"
                   f"<div class='url'>{html.escape(u)}</div></a>" for n, u, d in LINKS)
     return f"""
 <h3 class='mh'>메뉴</h3><div class='menu'>{''.join(views)}</div>
 <h3 class='mh'>매크로 분석 — 읽는 순서 <span class='mhs'>원인 → 방향 → 표현 → 확인 → 크기</span></h3><div class='menu'>{_layer_cards(layer_groups)}</div>
-<h3 class='mh'>외부 자료 <span class='mhs'>새 탭에서 열림 · druck/links.py에 추가</span></h3><div class='menu'>{ext}</div>
+<h3 class='mh'>외부 자료 <span class='mhs'>새 탭에서 열림 · 전체 목록(데이터·연준·한국은행·BIS 등)은 <a href='#ref-sites'>참고자료 → 유용한 사이트</a></span></h3><div class='menu'>{ext}</div>
 <div class='order'><b>용도 태그</b> — 각 도구는 '타이밍'(언제)·'사이즈'(얼마나)·'배경'(수년 구조)으로 구분됩니다. SD는 밸류에이션으로 타이밍을 잡지 않았습니다. 규칙의 원문 대조: 참고자료 · RULES.md</div>"""
 
 

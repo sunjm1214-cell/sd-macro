@@ -171,6 +171,16 @@ def load() -> dict | None:
     return {"items": items, "notes": notes, "owner": owner, "coverage": cov, "frame": frame}
 
 
+def _sites() -> str:
+    from .links import SITES
+    out = []
+    for group, items in SITES:
+        cards = "".join(f"<a class='site' href='{_e(u)}' target='_blank' rel='noopener'><b>{_e(n)} <span>↗</span></b>"
+                        f"<span class='sd'>{_e(d)}</span></a>" for n, u, d in items)
+        out.append(f"<h3 class='sg'>{_e(group)}</h3><div class='sites'>{cards}</div>")
+    return "".join(out)
+
+
 def view(ref: dict | None, sub: str = "") -> str:
     if not ref:
         return ("<div class='view' id='v-ref' data-title='참고자료'><h2 class='vt'>참고자료</h2>"
@@ -213,12 +223,20 @@ def view(ref: dict | None, sub: str = "") -> str:
   <details class='fold'><summary>합친 틀 — 4개 질문과 자산별 방향표</summary><div class='rbody'>{frame}</div></details>
   <details class='fold'><summary>못 읽었거나 다른 정리에 합친 자료</summary><div class='rbody'>{cov}</div></details>
 </section>
+<div class='lnav'><b>바로가기</b><a href='#ref-sites'>유용한 사이트</a><a href='#ref-interviews'>SD 인터뷰 정리</a></div>
+<section class='tool overview' id='ref-sites'><h3 class='h3s'>유용한 사이트 <span class='mhs'>새 탭에서 열림 · druck/links.py의 SITES에 한 줄씩 추가</span></h3>{_sites()}</section>
+<h3 class='mh' id='ref-interviews'>SD 인터뷰 정리</h3>
 <div class='lnav'><b>연도</b>{jump}</div>
 {''.join(rows)}
 </div>"""
 
 
 CSS = """
+.sg{font-size:14px;margin:16px 0 8px;color:var(--mute)} .sg:first-of-type{margin-top:4px}
+.sites{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:8px}
+.site{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);background:var(--panel)}
+.site:hover{border-color:var(--link)} .site b{font-size:14.5px} .site b span{color:var(--link);font-weight:400}
+.site .sd{font-size:12.5px;color:var(--mute);line-height:1.45}
 .ry{font-size:17px;margin:22px 0 8px}
 details.ref{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:6px 0}
 details.ref>summary{cursor:pointer;list-style:none;padding:10px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
