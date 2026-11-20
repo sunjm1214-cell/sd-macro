@@ -1,6 +1,6 @@
 # SD의 판단 규칙 — 원자료 대조 노트
 
-[Stanley Druckenmiller Knowledge Base (chian.io)](https://chian.io/projects/stanley-druckenmiller/sources)의 출처 35개(요약·핵심 발췌·전문 녹취)를
+[SD 지식 베이스 (chian.io)](https://chian.io/projects/stanley-druckenmiller/sources)의 출처 35개(요약·핵심 발췌·전문 녹취)를
 2026-10-13에 다시 읽고, 각 툴이 **그가 실제로 말한 것**과 맞는지 대조한 기록입니다.
 인용은 짧게, 나머지는 요지로 적었습니다. 녹취 일부는 자동 자막이라 단어가 틀릴 수 있습니다.
 

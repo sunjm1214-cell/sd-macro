@@ -8,7 +8,8 @@ from __future__ import annotations
 import html
 import json
 import math
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
 
 import pandas as pd
 
@@ -470,7 +471,7 @@ def render(results: list[ToolResult], recessions, demo: bool = False, as_of: str
     layer_views = [v.replace(f"__LNAV{i}__", lnav(i)) for (i, _l, _g), v in zip(layer_groups, layer_views)]
     banner = ("<div class='demo'>DEMO — 합성(가짜) 데이터입니다. 화면·로직 확인용이며 실제 시장 상태가 아닙니다. "
               "실데이터: <code>python -m druck run</code></div>") if demo else ""
-    gen = datetime.now().strftime("%Y-%m-%d %H:%M")
+    gen = datetime.now(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M") + " (한국시간)"
     sub = (f"생성 {gen}" + (" · 기준 시점 " + html.escape(as_of) if as_of else "")
            + f" · 데이터 {'합성(DEMO)' if demo else 'FRED / Yahoo'} · 차트의 회색 음영 = NBER 경기침체")
     def add_chart(spec: dict) -> str:

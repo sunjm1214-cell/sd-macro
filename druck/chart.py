@@ -13,7 +13,8 @@ from __future__ import annotations
 import html
 import json
 import math
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
 
 import pandas as pd
 
@@ -76,7 +77,7 @@ def render(ctx: Context, demo: bool = False, as_of: str | None = None, embed: bo
     rec = [[a.strftime("%Y-%m-%d"), (b + pd.offsets.MonthEnd(0)).strftime("%Y-%m-%d")]
            for a, b in ctx.recessions() if b >= pd.Timestamp(START)]
     payload = json.dumps({"series": series, "rec": rec}, ensure_ascii=False)
-    gen = datetime.now().strftime("%Y-%m-%d %H:%M")
+    gen = datetime.now(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M") + " (한국시간)"
     banner = ("<div class='demo'>DEMO — 합성(가짜) 데이터입니다. 실데이터: <code>python -m druck chart</code></div>"
               if demo else "")
     sources = "".join(f"<li><b>{html.escape(s['name'])}</b> — {html.escape(s['src'])}</li>" for s in series)
