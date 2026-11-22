@@ -20,6 +20,10 @@ from ..stats import fdate, fmt, percentile_rank, to_billions, to_freq, yoy_pct
 from . import src
 
 
+WB_MONEY = ["WB:USA:FM.LBL.BMNY.GD.ZS", "WB:CHN:FM.LBL.BMNY.GD.ZS", "WB:JPN:FM.LBL.BMNY.GD.ZS"]
+WB_NAMES = {"WB:USA:FM.LBL.BMNY.GD.ZS": "미국", "WB:CHN:FM.LBL.BMNY.GD.ZS": "중국", "WB:JPN:FM.LBL.BMNY.GD.ZS": "일본"}
+
+
 def net_liquidity(ctx: Context) -> pd.DataFrame:
     walcl = to_billions(to_freq(ctx.series("WALCL"), "W", "last"), 500, 10000)
     tga = ctx.try_series("WTREGEN")
@@ -42,7 +46,7 @@ def net_liquidity(ctx: Context) -> pd.DataFrame:
              src("Delivering Alpha 2022 (TGA)", "sources/delivering-alpha-2022"),
              src("Bloomberg Invest 2023 (TGA 재충전 = 흡수)", "sources/bloomberg-invest-ny-2023")],
     order=5,
-    series=["WALCL", "WTREGEN", "RRPONTSYD", "M2SL", "GDP"],
+    series=["WALCL", "WTREGEN", "RRPONTSYD", "M2SL", "GDP", *WB_MONEY],
     layer="유동성·연준",
     use="타이밍",
     lead="수개월 (변화율이 먼저 움직인다)",
@@ -115,11 +119,27 @@ def run(ctx: Context, roc_weeks: int = 26) -> ToolResult:
             "M2/GDP 역사적 분위": fmt(percentile_rank(k, float(k.iloc[-1])), "%", 0),
         })
         as_of = as_of or fdate(df.index[-1])
-        charts.append(Chart("M2 vs 명목GDP 증가율", {"M2 전년비": df["M2 전년비"],
-                                                    "명목GDP 전년비": df["명목GDP 전년비"]}, y_title="%",
+        charts.append(Chart("M2 ÷ 명목GDP (경제 규모 대비 돈의 양)", {"M2/명목GDP": k}, y_title="배율", years=None))
+        charts.append(Chart("M2 vs 명목GDP 증가율 (비율이 움직인 원인: 위가 M2면 돈 폭증, 아래면 경제 정체)",
+                            {"M2 전년비": df["M2 전년비"], "명목GDP 전년비": df["명목GDP 전년비"]}, y_title="%",
                             hlines=[(0, "")]))
     except DataUnavailable as e:
         notes.append(f"M2/GDP 데이터 없음: {e}")
+
+    # 국가 비교 (세계은행 연간, 판정에는 쓰지 않음) — 2021년 그의 '미국 +25% vs 중국 3년 전과 같음'
+    wb = {WB_NAMES[i]: s for i in WB_MONEY if (s := ctx.try_series(i)) is not None and len(s) > 5}
+    if wb:
+        wdf = pd.DataFrame(wb)
+        wdf = wdf[wdf.index.year >= 1985]
+        charts.append(Chart("광의통화 ÷ GDP: 미국 vs 중국 vs 일본 (세계은행 연간, %)",
+                            {c: wdf[c].dropna() for c in wdf}, y_title="GDP 대비 %", years=None))
+        for name, sr in wb.items():
+            sr = sr.dropna()
+            if len(sr) > 3:
+                metrics[f"{name} 광의통화/GDP ({sr.index[-1].year})"] = (
+                    f"{sr.iloc[-1]:.0f}% (3년 {(sr.iloc[-1] / sr.iloc[-4] - 1) * 100:+.0f}%)")
+        notes.append("국가 비교는 세계은행 '광의통화' 기준이라 미국 값이 M2보다 큽니다. 나라마다 돈의 정의가 달라 수준보다 각국의 움직임을 보세요. "
+                     "중국·일본이 GDP의 2배가 넘는 건 은행 대출 중심 금융과 높은 저축 때문입니다.")
 
     if not have_any:
         raise DataUnavailable("유동성 데이터 전부 없음")
@@ -132,6 +152,9 @@ def run(ctx: Context, roc_weeks: int = 26) -> ToolResult:
         sig, msg = Signal.WATCH, "혼조 — 유동성 방향이 엇갈림"
     else:
         sig, msg = Signal.WATCH, "약한 " + ("확장" if score > 0 else "수축") + " — 한쪽만 뚜렷하고 다른 쪽은 보합"
+    notes.insert(0, "M2÷명목GDP가 오르는 이유는 둘입니다. ① 돈이 폭증(미국 2020년 → 인플레이션·자산 버블) ② 경제가 정체해 돈이 예금에 쌓임"
+                 "(일본 1990년대 이후, 중국 2022년 이후 → 디플레이션). 같은 상승이라도 의미가 정반대이므로, 아래 'M2 vs 명목GDP 증가율' 차트로 원인을 확인하세요. "
+                 "수준보다 속도가 중요합니다: 1970년대엔 비율이 평평해도 고인플레였고, 2010년대엔 꾸준히 올라도 소비자물가는 조용했습니다(돈이 자산으로 감).")
     notes.insert(0, "순유동성은 시장 참여자들이 쓰는 통상적 근사치이며 SD가 이 공식을 직접 쓴 것은 아닙니다. 그가 실제로 언급한 재료(QE·QT 규모, TGA, M2 vs 명목GDP)를 합친 것입니다.")
     headline = f"{', '.join(parts)} → {msg}" if parts else msg
     return ToolResult(sig, headline, metrics, notes, tables, charts, as_of=as_of)

@@ -58,6 +58,7 @@ SITES: list[tuple[str, list[tuple[str, str, str]]]] = [
 
 # ---------------------------------------------------------------- 지표 원본 데이터 링크
 FRED_URL = "https://fred.stlouisfed.org/series/{}"
+WB_URL = "https://data.worldbank.org/indicator/{ind}?locations={c}"
 YAHOO_URL = "https://finance.yahoo.com/quote/{}"
 
 SERIES_NAMES: dict[str, str] = {
@@ -77,7 +78,17 @@ SERIES_NAMES: dict[str, str] = {
     "DEXUSEU": "달러/유로 환율", "DEXJPUS": "엔/달러 환율", "ECBDFR": "ECB 예금금리", "IRSTCI01JPM156N": "일본 콜금리(월)",
     "DFII10": "10년 실질금리(TIPS)", "DGS10": "10년물 국채금리(일별)",
     "DFEDTARU": "연방기금 목표금리 상단(일별)", "DGS2": "2년물 국채금리(일별)",
+    "WB:CHN:FM.LBL.BMNY.GD.ZS": "중국 광의통화/GDP(세계은행)", "WB:JPN:FM.LBL.BMNY.GD.ZS": "일본 광의통화/GDP(세계은행)",
+    "WB:USA:FM.LBL.BMNY.GD.ZS": "미국 광의통화/GDP(세계은행)",
 }
+
+
+def series_url(sid: str) -> str:
+    """FRED 시리즈 주소. 'WB:국가:지표'는 세계은행 지표 페이지."""
+    if sid.startswith("WB:"):
+        _, c, ind = sid.split(":", 2)
+        return WB_URL.format(ind=ind, c=c)
+    return FRED_URL.format(sid)
 TICKER_NAMES: dict[str, str] = {
     "SPY": "S&P 500", "GLD": "금", "XRT": "소매", "IYT": "운송", "ITB": "주택건설", "IWM": "러셀2000",
     "XME": "금속·광업", "XLP": "필수소비재", "XLU": "유틸리티",
@@ -88,6 +99,6 @@ TICKER_NAMES: dict[str, str] = {
 
 def data_links(series=(), tickers=()) -> list[tuple[str, str, str]]:
     """(표시 이름, ID, 주소) 목록 — 리포트의 '데이터 원본' 칩에 쓴다."""
-    out = [(SERIES_NAMES.get(s, s), s, FRED_URL.format(s)) for s in series]
+    out = [(SERIES_NAMES.get(s, s), s, series_url(s)) for s in series]
     out += [(TICKER_NAMES.get(t, t), t, YAHOO_URL.format(t)) for t in tickers]
     return out

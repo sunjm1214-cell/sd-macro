@@ -272,6 +272,14 @@ class DemoSource:
     def get(self, sid: str) -> pd.Series:
         if sid in self.overrides:
             return self.overrides[sid].copy()
+        if sid.startswith("WB:"):  # 세계은행 광의통화/GDP — 실제 경로를 대략 따른 연간 값
+            anchors = {"CHN": {1977: 26, 1990: 78, 2000: 134, 2008: 147, 2015: 198, 2018: 192, 2020: 208, 2024: 228},
+                       "JPN": {1977: 124, 1990: 179, 2000: 226, 2001: 188, 2008: 196, 2019: 247, 2020: 273, 2025: 247},
+                       "USA": {1977: 71, 1994: 60, 2007: 80, 2009: 91, 2019: 92, 2021: 115, 2023: 99, 2025: 100}}
+            a = anchors.get(sid.split(":")[1], anchors["USA"])
+            yrs = list(range(min(a), max(a) + 1))
+            return pd.Series(np.interp(yrs, list(a), list(a.values())),
+                             index=pd.DatetimeIndex([f"{y}-01-01" for y in yrs]), name=sid)
         if sid in MARKET_DEMO:
             return market_demo(sid).rename(sid)
         if sid not in self._cache:

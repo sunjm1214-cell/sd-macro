@@ -25,6 +25,7 @@ from .core import DataUnavailable
 
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}"
 FRED_API = "https://api.stlouisfed.org/fred/series/observations?{q}"
+WB_API = "https://api.worldbank.org/v2/country/{c}/indicator/{ind}?format=json&per_page=500"
 
 
 def _default_cache() -> Path:
@@ -183,6 +184,14 @@ class FredSource(_Checked):
             return r.read().decode("utf-8")
 
     def _download(self, sid: str) -> pd.Series:
+        if sid.startswith("WB:"):  # 세계은행 연간 지표: 'WB:국가코드:지표코드'
+            _, c, ind = sid.split(":", 2)
+            rows = json.loads(self._fetch(WB_API.format(c=c, ind=ind)))
+            obs = [r for r in (rows[1] if len(rows) > 1 and rows[1] else []) if r.get("value") is not None]
+            if not obs:
+                raise ValueError("빈 시리즈")
+            return pd.Series([float(r["value"]) for r in obs],
+                             index=pd.to_datetime([f"{r['date']}-01-01" for r in obs]), name=sid).sort_index()
         if self.api_key:
             q = urllib.parse.urlencode({"series_id": sid, "api_key": self.api_key, "file_type": "json"})
             obs = json.loads(self._fetch(FRED_API.format(q=q)))["observations"]

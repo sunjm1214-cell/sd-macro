@@ -223,7 +223,9 @@ def test_every_tool_links_to_its_source_data():
         links = data_links(s.series, s.tickers)
         assert links, s.name
         for name, sid, url in links:
-            assert url.startswith("https://") and sid in url
+            assert url.startswith("https://") and sid.split(":")[-1] in url
+            if sid.startswith("WB:"):
+                assert sid.split(":")[1] in url and sid in SERIES_NAMES
             if "fred" in url:
                 assert sid in SERIES_NAMES, f"{s.name}: {sid} 한글 이름 없음"
 
@@ -324,3 +326,11 @@ def test_breadth_adl_and_view():
     charts = []
     h = view(b, "sub", lambda k: "", lambda spec: charts.append(spec) or f"c{len(charts)}")
     assert "v-chart-breadth" in h and "데이터 없음" in h and len(charts) == 2 and charts[0]["layout"]["yaxis2"]["overlaying"] == "y"
+
+
+def test_liquidity_country_money_comparison(ctx):
+    r = next(x for x in run_all(ctx) if x.tool == "liquidity")
+    titles = [c.title for c in r.charts]
+    assert any("M2 ÷ 명목GDP" in t for t in titles)
+    assert any("중국" in t for t in titles)
+    assert any(k.startswith("중국 광의통화/GDP") for k in r.metrics)
