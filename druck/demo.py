@@ -110,6 +110,7 @@ class DemoSource:
         df["m2"] = 300 * np.exp(np.cumsum((df["ngdp_g"] + _anchor({1960: 0, 2008: 1, 2009: 3, 2012: 1, 2020.2: 0,
                                                                   2020.4: 60, 2021.5: 10, 2022.3: -2,
                                                                   2023.4: -9, 2024: 0, 2027: 0}, idx)) / 1200))
+        df["ip"] = 20 * np.exp(np.cumsum((1.3 * df["g"] - 1.0 - 8 * rec) / 1200))  # 산업생산: 실물보다 경기에 민감
         df["hy"] = np.clip(3.3 + 4.5 * rec.rolling(6, min_periods=1).mean() + 0.8 * (df["u"] - df["nrou"]).clip(0)
                            + _anchor({1960: 0, 2008.8: 9, 2009.6: 0, 2020.25: 4, 2020.6: 0, 2027: 0}, idx)
                            + ar(0.15, 0.85), 2.4, None)
@@ -172,6 +173,8 @@ class DemoSource:
             return self._daily(m["y10"]["1982":] - m["y3m"]["1982":], noise=0.03)
         if sid == "M2SL":
             return ms(m["m2"])
+        if sid == "INDPRO":
+            return ms(m["ip"])
         if sid == "BAMLH0A0HYM2":
             return self._daily(m["hy"]["1996-12":], noise=0.05)
         if sid == "NCBEILQ027S":  # 백만 달러

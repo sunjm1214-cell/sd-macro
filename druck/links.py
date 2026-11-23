@@ -68,7 +68,7 @@ SERIES_NAMES: dict[str, str] = {
     "FDHBFIN": "외국인 보유 미 국채", "FEDFUNDS": "기준금리(연방기금금리)", "FGEXPND": "연방정부 지출",
     "FGRECPT": "연방정부 수입", "FYFSGDA188S": "연방 재정수지/GDP", "GDP": "명목GDP", "GDPC1": "실질GDP",
     "GDPPOT": "잠재GDP(CBO)", "GFDEBTN": "연방부채 총액", "GFDEGDQ188S": "연방부채/GDP", "GS10": "10년물 국채금리",
-    "GS5": "5년물 국채금리", "IEABC": "경상수지", "IIPUSNETIQ": "순국제투자포지션(NIIP)", "M2SL": "M2 통화량",
+    "GS5": "5년물 국채금리", "IEABC": "경상수지", "IIPUSNETIQ": "순국제투자포지션(NIIP)", "INDPRO": "산업생산지수", "M2SL": "M2 통화량",
     "NCBEILQ027S": "비금융기업 주식 시가총액", "NFCI": "시카고연준 금융여건지수", "NROU": "자연실업률(CBO)",
     "PCEPILFE": "근원 PCE 물가", "RBUSBIS": "달러 실질실효환율(BIS)", "RRPONTSYD": "역레포 잔액",
     "RTWEXBGS": "달러 실질실효환율(연준)", "T10Y2Y": "10년−2년 금리차", "T10Y3M": "10년−3개월 금리차",
