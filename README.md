@@ -43,7 +43,7 @@ SD(유명 매크로 투자자)가 연설·인터뷰·기고 56개(1994~2026)에�
 | ① | `clarity` 명확성 점검 | 연준 완화·원자재 돌파·시장 폭 신고가·타이트한 신용·경기민감주 주도가 한 방향이면 크게, 엇갈리면 '안 한다'(자본 보존). 신용은 수준=Baa, 방향=하이일드 | GDP, FEDFUNDS, BAA10Y, BAMLH0A0HYM2, Yahoo: CPER, RSP, SPY, 업종 ETF | TomorrowX 2026 |
 | ① | `global_liquidity` 글로벌 중앙은행 유동성 | 연준·ECB·일본은행 자산 합산의 1년 증감(속도)과 가속도 — 연 1조 매입이 −6천억으로 가는 변화가 위험 | WALCL, ECBASSETSW, JPNASSETS, DEXUSEU, DEXJPUS | CNBC 2017, Real Vision 2018 |
 | ① | `liquidity` 유동성 | 시장을 움직이는 건 연준과 유동성. 수준보다 변화율 — 연 1조 달러 매입이 1년 만에 0으로 가는 것 자체가 충격 | WALCL, WTREGEN, RRPONTSYD, M2SL, GDP | Lost Tree 2015, Real Vision 2018, GS 2021 |
-| ① | `m2_vs_ip` SD 유동성 규칙 | 통화 공급이 산업생산보다 훨씬 빨리 늘면 주식은 대체로 오른다 — 차이(M2 − 산업생산)의 수준과 6개월 방향 | M2SL, INDPRO | 2009 은행 FX 강연 |
+| ① | `m2_vs_ip` SD 유동성 규칙 | 통화 공급이 산업생산보다 훨씬 빨리 늘면 주식은 대체로 오른다 — 차이(M2 − 산업생산)가 1년 새 +5%p 이상 벌어지면 가장 강함(60년 검증), 축소·역전은 연준 긴축과 겹칠 때만 경고 | M2SL, INDPRO, FEDFUNDS | 2009 은행 FX 강연 |
 | ① | `mars_fed_funds` 화성인 금리 게임 | 데이터만 보면 금리는 몇 %? 2003년 명목성장 9% vs 기준금리 1% → 답 3~6% | FEDFUNDS, PCEPILFE, UNRATE, NROU, GDP | Lost Tree 2015, Endgame 2016, Real Vision 2018 |
 | ① | `inflation_rule` 5% 규칙 | CPI 5% 초과 시 ① 기준금리>CPI 없이 안 내려왔고 ② 침체 없이 안 잡혔다 | CPIAUCSL, FEDFUNDS, USREC | Sohn 2022 |
 | ① | `financial_conditions` 금융여건 | 이론이 아니라 시장을 본다 — 주식·금 신고가, 신용 타이트, 성장 추세 이상인데 인하하면 인플레 재점화 | SPY, GLD, BAA10Y, GDPC1, GDPPOT, NFCI | Bloomberg 2024 |
